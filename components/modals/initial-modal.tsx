@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import * as z from "zod";
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from "react-hook-form";
@@ -23,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FileUploader } from "../file-upload";
+import { useRouter } from "next/navigation";
 
 // 表单验证
 const formSchema = z.object({
@@ -35,6 +37,8 @@ const formSchema = z.object({
 })
 
 export const InitialModal = () => {
+
+  const router = useRouter();
 
   // 定义表单
   const form = useForm({
@@ -49,7 +53,14 @@ export const InitialModal = () => {
 
   // 提交表单
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    try {
+      await axios.post("/api/servers", values)
+      form.reset();
+      router.refresh();
+      window.location.reload();
+    } catch (error) {
+      console.log('error:', error)
+    }
   };
 
   return (
