@@ -2,8 +2,12 @@
 
 import { Plus } from "lucide-react"
 import { ActionTooltip } from "@/components/action-tooltip"
+import { useModal } from "@/hooks/use-model-store"
 
 export const NavigationAction = () => {
+
+  const { onOpen } = useModal()
+
   return (
     <div>
 
@@ -14,6 +18,7 @@ export const NavigationAction = () => {
         label="添加频道"
       >
         <button
+          onClick={() => onOpen("createServer")}
           className="group flex items-center"
         >
           <div
