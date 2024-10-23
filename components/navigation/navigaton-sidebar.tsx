@@ -31,7 +31,7 @@ export const NavigationSidebar = async() => {
       className="space-y-4 flex flex-col items-center
         h-full text-primary w-full dark:bg-[#1E1F22] py-3"
     >
-      {/* 添加频道服务器按钮 */}
+      {/* 添加服务器按钮 */}
       <NavigationAction />
 
       {/* 分隔符 */}
@@ -40,7 +40,7 @@ export const NavigationSidebar = async() => {
         rounded-md w-full mx-auto"
       />
 
-      {/* 频道服务器列表 */}
+      {/* 服务器列表 */}
       <ScrollArea
         className="flex-1 w-full"
       >

@@ -11,7 +11,7 @@ export const NavigationAction = () => {
   return (
     <div>
 
-      {/* 添加频道按钮 */}
+      {/* 添加服务器按钮 */}
       <ActionTooltip
         side="right"
         align="center"
