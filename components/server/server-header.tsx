@@ -4,6 +4,7 @@ import { ServerWithMembersWithProfile } from "@/type";
 import { MemberRole } from "@prisma/client";
 import { DropdownMenu, DropdownMenuContent,DropdownMenuItem, DropdownMenuTrigger,DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ChevronDown, UserPlus,Settings, Users, PlusCircle, Trash, LogOut } from "lucide-react";
+import { useModal } from "@/hooks/use-model-store";
 
 interface ServerHeaderProps {
   server: ServerWithMembersWithProfile;
@@ -14,6 +15,8 @@ export const ServerHeader = ({
   server,
   role
 }: ServerHeaderProps) => {
+
+  const { onOpen } = useModal();
 
   // 确认是否为管理员
   const isAdmin = role === MemberRole.ADMIN;
@@ -39,13 +42,14 @@ export const ServerHeader = ({
         </button>
       </DropdownMenuTrigger>
 
-      {/*  */}
+      {/* 操作选项 */}
       <DropdownMenuContent
         className="w-56 text-xs font-medium text-black dark:text-neutral-400 space-y-[2px]"
       >
         {/* 群主选项 */}
         { isModerator && (
           <DropdownMenuItem 
+           onClick={() => onOpen("invite", { server })}
             className="text-indigo-600 dark:text-indigo-400 px-3 py-2 text-sm cursor-pointer"
           >
             邀请成员
