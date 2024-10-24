@@ -46,7 +46,7 @@ export const ServerHeader = ({
       <DropdownMenuContent
         className="w-56 text-xs font-medium text-black dark:text-neutral-400 space-y-[2px]"
       >
-        {/* 群主选项 */}
+        {/* 群主-邀请成员选项 */}
         { isModerator && (
           <DropdownMenuItem 
            onClick={() => onOpen("invite", { server })}
@@ -57,9 +57,10 @@ export const ServerHeader = ({
           </DropdownMenuItem>
         )}
 
-        {/* 管理员选项 */}
+        {/* 管理员-服务器设置选项 */}
         { isAdmin && (
-          <DropdownMenuItem 
+          <DropdownMenuItem
+          onClick={() => onOpen("editServer", { server })}
             className=" px-3 py-2 text-sm cursor-pointer"
           >
             服务器设置
