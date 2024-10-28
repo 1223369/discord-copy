@@ -2,8 +2,11 @@
 
 import { ServerWithMembersWithProfiles } from "@/type";
 import { Check, Gavel, Loader2, MoreVertical, Shield, ShieldAlert, ShieldCheck, ShieldQuestion } from "lucide-react";
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import { useModal } from "@/hooks/use-model-store";
+import { MemberRole } from "@prisma/client";
+import qs from "query-string";
+import axios from "axios";
 
 import {
   Dialog,
@@ -24,9 +27,12 @@ import {
   DropdownMenuSubTrigger
  } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
 import { UserAvatar } from "@/components/use-avatar";
 
 export const MembersModal = () => {
+
+  const router = useRouter();
   const { isOpen, onOpen, onClose, type, data } = useModal();
   const [loadingId, setLoadingId] = useState("");
 
@@ -38,6 +44,54 @@ export const MembersModal = () => {
   const isModalOpen = isOpen && type === 'members'
 
   const { server } = data as { server: ServerWithMembersWithProfiles }
+
+  // 权限修改 
+  const onRoleChange = async (memberId: string, role: MemberRole) => {
+    try {
+      setLoadingId(memberId)
+
+      const url = qs.stringifyUrl({
+        url: `/api/members/${memberId}`,
+        query: {
+          serverId: server.id,
+        }
+      });
+
+      const response = await axios.patch(url, { role });
+      router.refresh();
+      onOpen("members", { server: response.data })
+
+    } catch (error) {
+      console.log('error', error)
+    } finally {
+      setLoadingId("")
+    }
+  }
+
+  // 移除成员
+  const onKick = async (memberId: string) => {
+    try {
+      setLoadingId(memberId)
+
+      const url = qs.stringifyUrl({
+        url: `/api/members/${memberId}`,
+        query: {
+          serverId: server?.id,
+        }
+      });
+
+      const response = await axios.delete(url);
+
+      router.refresh();
+      onOpen("members", { server: response.data })
+
+    } catch (error) {
+      console.log('error', error)
+    } finally {
+      setLoadingId("")
+    }
+  }
+
 
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
@@ -89,14 +143,14 @@ export const MembersModal = () => {
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                           <DropdownMenuSubContent>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onRoleChange(member.id, "GUEST")}>
                               <Shield className="h-4 w-4 mr-2"/>
                               成员
                               {member.role === "GUEST" && (
                                 <Check className="w-4 h-4 mr-2"/>
                               )}
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onRoleChange(member.id, "MODERATOR")}>
                               <ShieldCheck className="h-4 w-4 mr-2"/>
                               群主
                               {member.role === "MODERATOR" && (
@@ -108,7 +162,9 @@ export const MembersModal = () => {
                       </DropdownMenuSub>
 
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => onKick(member.id)}
+                      >
                         <Gavel className="w-4 h-4 mr-2"/>
                         移除
                       </DropdownMenuItem>
