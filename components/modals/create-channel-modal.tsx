@@ -59,8 +59,24 @@ export const CreateChannelModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      type: ChannelType.TEXT,
     }
   });
+
+  // 获取频道类型标签
+  const getChannelTypeLabel = (type: ChannelType) => {
+    switch (type) {
+      case ChannelType.TEXT:
+        return "文字频道";
+      case ChannelType.AUDIO:
+        return "语音频道";
+      case ChannelType.VIDEO: // 注意此处的拼写应为 VIDEO，而不是 VODEO
+        return "视频频道";
+      default:
+        return "未知频道类型";
+    }
+  };
+
   // 是否加载中
   const isLoading = form.formState.isSubmitting;
 
@@ -118,6 +134,44 @@ export const CreateChannelModal = () => {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* 频道类型 */}
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      频道类型
+                    </FormLabel>
+                    <Select
+                      disabled={isLoading}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger
+                          className="bg-zinc-300/50 border-0 focus:ring-0 text-black 
+                          ring-offset-0 focus:ring-offset-0 capitalize outline-none"
+                        >
+                          <SelectValue placeholder="请选择频道类型"/>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(ChannelType).map((type) => (
+                          <SelectItem key={type} value={type} 
+                            className="capitalize"
+                          >
+                            {
+                             getChannelTypeLabel(type)
+                            }
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
