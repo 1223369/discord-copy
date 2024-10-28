@@ -79,9 +79,10 @@ export const ServerHeader = ({
           </DropdownMenuItem>
         )}
 
-        {/* 成员选项 */}
+        {/* 群主-创建频道选项 */}
         {isModerator && (
           <DropdownMenuItem
+            onClick={() => onOpen("createChannel")}
             className=" px-3 py-2 text-sm cursor-pointer"
           >
             创建频道
