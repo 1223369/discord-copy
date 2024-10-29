@@ -1,5 +1,6 @@
 "use client";
 
+import qs from "query-string";
 import axios from "axios";
 import * as z from "zod";
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -29,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useModal } from "@/hooks/use-model-store";
 import { ChannelType } from "@prisma/client";
 
@@ -38,9 +39,9 @@ const formSchema = z.object({
   name: z.string().min(1, {
     message: "名称不能为空"
   }).refine(
-    name => name !== "一般",
+    name => name !== "general",
     {
-      message: "名称不能为'一般'"
+      message: "名称不能为'general'"
     }
   ),
   type: z.nativeEnum(ChannelType),
@@ -51,6 +52,7 @@ export const CreateChannelModal = () => {
   const { isOpen, onClose, type } = useModal()
 
   const router = useRouter();
+  const params = useParams();
 
   const isModalOpen = isOpen && type === 'createChannel'
 
@@ -83,7 +85,15 @@ export const CreateChannelModal = () => {
   // 提交表单
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.post("/api/servers", values)
+
+      const url = qs.stringifyUrl({
+        url: "/api/channels",
+        query: {
+          serverId: params?.serverId,
+          name: values.name,
+        }
+      })
+      await axios.post(url, values)
       form.reset();
       router.refresh();
       onClose();
