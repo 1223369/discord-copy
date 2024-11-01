@@ -1,13 +1,13 @@
 "use client";
 
-import { ServerWithMembersWithProfile } from "@/type";
+import { ServerWithMembersWithProfiles } from "@/type";
 import { MemberRole } from "@prisma/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ChevronDown, UserPlus, Settings, Users, PlusCircle, Trash, LogOut } from "lucide-react";
 import { useModal } from "@/hooks/use-model-store";
 
 interface ServerHeaderProps {
-  server: ServerWithMembersWithProfile;
+  server: ServerWithMembersWithProfiles;
   role?: MemberRole;
 }
 
@@ -108,6 +108,7 @@ export const ServerHeader = ({
         {/* 非管理员退出服务器选项 */}
         {!isAdmin && (
           <DropdownMenuItem
+            onClick={() => onOpen("leaveServer", { server })}
             className="text-rose-500 px-3 py-2 text-sm cursor-pointer"
           >
             退出服务器
