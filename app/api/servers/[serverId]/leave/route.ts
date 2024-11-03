@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
 
+// 离开服务器接口
 export async function PATCH(
   req: Request,
   { params }: { params: { serverId: string } }
