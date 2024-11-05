@@ -6,7 +6,9 @@ import { ServerHeader } from "@/components/server/server-header";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ServerSearch } from "@/components/server/server-search";
 import { Hash, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react";
-import { Label } from "@radix-ui/react-label";
+import { Separator } from "@/components/ui/separator";
+import { ServerSection } from "@/components/server/server-section";
+import { ServerChannel } from "@/components/server/server-channel";
 
 interface ServerSidebarProps {
   serverId: string;
@@ -81,6 +83,7 @@ export const ServerSidebar = async ({
       />
       {/* 频道列表 */}
       <ScrollArea className="flex-1 px-3 ">
+        {/* 搜索框 */}
         <div className="mt-2">
           <ServerSearch
             data={[
@@ -123,6 +126,29 @@ export const ServerSidebar = async ({
             ]}
           />
         </div>
+
+        <Separator className="bg-zinc-200 dark:bg-zinc-700 rounded-md my-2"/>
+        
+        {/* 文字频道列表 */}
+        {!!textChanels?.length && (
+          <div className="mb-2">
+            <ServerSection 
+              sectionType="channels"
+              channelType={ChannelType.TEXT}
+              role={role}
+              label="文字频道"
+            />
+            {textChanels.map((channel) => (
+              <ServerChannel 
+                key={channel.id}
+                channel={channel}
+                role={role}
+                server={server}
+              />
+            ))}
+          </div>
+        )}
+
       </ScrollArea>
     </div>
   )
