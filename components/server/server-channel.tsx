@@ -6,6 +6,7 @@ import { Edit, Hash, Lock, Mic, Trash, Video } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { ActionTooltip } from "@/components/action-tooltip";
+import { useModal } from "@/hooks/use-model-store";
 
 interface ServerChannelProps {
   channel: Channel;
@@ -24,6 +25,8 @@ export const ServerChannel = ({
   server,
   role,
 }: ServerChannelProps) => {
+
+  const { onOpen } = useModal();
 
   const params = useParams();
   const router = useRouter();
@@ -45,21 +48,23 @@ export const ServerChannel = ({
       )}>
         {channel.name}
       </p>
-      {channel.name !== "general" && role !== MemberRole.GUEST && (
+      {channel.name !== "默认" && role !== MemberRole.GUEST && (
         <div className="ml-auto flex items-center gap-x-2">
           <ActionTooltip label="编辑">
             <Edit 
+              onClick={() => onOpen("editChannel", { server, channel })}
               className="hidden group-hover:block w-4 h-5 text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300 transition"
             />
           </ActionTooltip>
           <ActionTooltip label="删除">
-            <Trash 
+            <Trash
+              onClick={() => onOpen("deleteChannel", { server, channel })}
               className="hidden group-hover:block w-4 h-5 text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300 transition"
             />
           </ActionTooltip>
         </div>
       )}
-      {channel.name === "general" && (
+      {channel.name === "默认" && (
         <Lock 
           className="ml-auto w-4 h-4 text-zinc-500 dark:text-zinc-400"
         />

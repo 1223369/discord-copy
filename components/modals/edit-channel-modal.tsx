@@ -1,7 +1,7 @@
 "use client";
 
 import qs from "query-string";
-import axios, { formToJSON } from "axios";
+import axios from "axios";
 import * as z from "zod";
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from "react-hook-form";
@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useModal } from "@/hooks/use-model-store";
 import { ChannelType } from "@prisma/client";
 import { useEffect } from "react";
@@ -48,32 +48,30 @@ const formSchema = z.object({
   type: z.nativeEnum(ChannelType),
 })
 
-export const CreateChannelModal = () => {
+export const EditChannelModal = () => {
 
   const { isOpen, onClose, type, data } = useModal()
 
   const router = useRouter();
-  const params = useParams();
 
-  const isModalOpen = isOpen && type === 'createChannel'
-  const { channelType } = data;
+  const isModalOpen = isOpen && type === 'editChannel'
+  const { channel, server } = data;
 
   // 定义表单
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      type: channelType || ChannelType.TEXT,
+      type: channel?.type || ChannelType.TEXT,
     }
   });
 
   useEffect(() => {
-    if (channelType) {
-      form.setValue('type', channelType)
-    } else {
-      form.setValue('type', ChannelType.TEXT)
+    if (channel) {
+      form.setValue("name", channel.name)
+      form.setValue("type", channel.type)
     }
-  },[channelType, form])
+  },[form, channel])
 
   // 获取频道类型标签
   const getChannelTypeLabel = (type: ChannelType) => {
@@ -97,13 +95,13 @@ export const CreateChannelModal = () => {
     try {
 
       const url = qs.stringifyUrl({
-        url: "/api/channels",
+        url: `/api/channels/${channel?.id}`,
         query: {
-          serverId: params?.serverId,
+          serverId: server?.id,
           name: values.name,
         }
       })
-      await axios.post(url, values)
+      await axios.patch(url, values)
       form.reset();
       router.refresh();
       onClose();
@@ -124,7 +122,7 @@ export const CreateChannelModal = () => {
         {/* 表单头 */}
         <DialogHeader className="pt-8 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
-            创建频道
+            修改频道
           </DialogTitle>
         </DialogHeader>
 
@@ -198,7 +196,7 @@ export const CreateChannelModal = () => {
               />
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4">
-              <Button variant={"primary"} disabled={isLoading}>创建</Button>
+              <Button variant={"primary"} disabled={isLoading}>保存</Button>
             </DialogFooter>
           </form>
         </Form>
