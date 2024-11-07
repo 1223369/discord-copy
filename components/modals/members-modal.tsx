@@ -104,7 +104,7 @@ export const MembersModal = () => {
           <DialogDescription
             className="text-center text-zinc-500"
           >
-            {server?.members?.length} members
+            {server?.members?.length} 成员
           </DialogDescription>
         </DialogHeader>
 
@@ -152,7 +152,7 @@ export const MembersModal = () => {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onRoleChange(member.id, "MODERATOR")}>
                               <ShieldCheck className="h-4 w-4 mr-2"/>
-                              群主
+                              管理员
                               {member.role === "MODERATOR" && (
                                 <Check className="w-4 h-4 mr-2"/>
                               )}
