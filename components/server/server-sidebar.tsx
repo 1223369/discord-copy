@@ -9,6 +9,7 @@ import { Hash, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ServerSection } from "@/components/server/server-section";
 import { ServerChannel } from "@/components/server/server-channel";
+import { ServerMember } from "@/components/server/server-member";
 
 interface ServerSidebarProps {
   serverId: string;
@@ -127,25 +128,93 @@ export const ServerSidebar = async ({
           />
         </div>
 
-        <Separator className="bg-zinc-200 dark:bg-zinc-700 rounded-md my-2"/>
-        
+        <Separator className="bg-zinc-200 dark:bg-zinc-700 rounded-md my-2" />
+
         {/* 文字频道列表 */}
         {!!textChanels?.length && (
           <div className="mb-2">
-            <ServerSection 
+            <ServerSection
               sectionType="channels"
               channelType={ChannelType.TEXT}
               role={role}
               label="文字频道"
             />
-            {textChanels.map((channel) => (
-              <ServerChannel 
-                key={channel.id}
-                channel={channel}
-                role={role}
-                server={server}
-              />
-            ))}
+            <div className="space-y-[2px]">
+              {textChanels.map((channel) => (
+                <ServerChannel
+                  key={channel.id}
+                  channel={channel}
+                  role={role}
+                  server={server}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 语音频道列表 */}
+        {!!audioChanels?.length && (
+          <div className="mb-2">
+            <ServerSection
+              sectionType="channels"
+              channelType={ChannelType.AUDIO}
+              role={role}
+              label="语音频道"
+            />
+            <div className="space-y-[2px]">
+              {audioChanels.map((channel) => (
+                <ServerChannel
+                  key={channel.id}
+                  channel={channel}
+                  role={role}
+                  server={server}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 视频频道列表 */}
+        {!!videoChanels?.length && (
+          <div className="mb-2">
+            <ServerSection
+              sectionType="channels"
+              channelType={ChannelType.VIDEO}
+              role={role}
+              label="视频频道"
+            />
+            <div className="space-y-[2px]">
+              {videoChanels.map((channel) => (
+                <ServerChannel
+                  key={channel.id}
+                  channel={channel}
+                  role={role}
+                  server={server}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 服务器成员列表 */}
+        {!!members?.length && (
+          <div className="mb-2">
+            <ServerSection
+              sectionType="members"
+              role={role}
+              label="成员"
+              server={server}
+            />
+            <div className="space-y-[2px]">
+              {members.map((member) => (
+                <ServerMember 
+                  key={member.id}
+                  member={member}
+                  server={server}
+                />
+              ))}
+            </div>
+
           </div>
         )}
 
