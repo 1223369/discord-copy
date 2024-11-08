@@ -35,7 +35,7 @@ export const ServerChannel = ({
 
   // 跳转到指定频道
   const onClick = () => {
-    router.push(`/server/${params.serverId}/channels/${channel.id}`)
+    router.push(`/servers/${params.serverId}/channels/${channel.id}`)
   }
 
   // 防止事件冒泡

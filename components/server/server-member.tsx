@@ -29,7 +29,7 @@ export const ServerMember = ({
 
   // 跳转到聊天页面
   const onClick = () => {
-    router.push(`/servers/${params.serverId}/conversations/${member.id}`)
+    router.push(`/servers/${params.serverId}/conversation/${member.id}`)
   }
 
   return (
