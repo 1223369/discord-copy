@@ -1,9 +1,26 @@
 "use client"
 
+import * as z from "zod";
+import axios from "axios";
+import qs from "query-string";
 import { Member, MemberRole, Profile } from "@prisma/client";
 import { UserAvatar } from "../use-avatar";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ActionTooltip } from "@/components/action-tooltip";
-import { ShieldAlert, ShieldCheck } from "lucide-react";
+import { Edit, FileIcon, ShieldAlert, ShieldCheck, Trash } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { useModal } from "@/hooks/use-model-store";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
 
 interface ChatItemProps {
   id: string;
@@ -26,6 +43,10 @@ const roleIconMap = {
   "ADMIN": <ShieldAlert className="h-4 w-4 ml-2 text-rose-500" />,
 }
 
+const formSchema = z.object({
+  content: z.string().min(1),
+});
+
 export const ChatItem = ({
   id,
   content,
@@ -39,7 +60,65 @@ export const ChatItem = ({
   socketQuery,
 }: ChatItemProps) => {
 
-  
+  const [isEditing, setIsEditing] = useState(false);
+  const { onOpen } = useModal()
+
+  const fileType = fileUrl?.includes("PD5k") ? "pdf" : "";
+  // const fileType = fileUrl?.split(".").pop();
+
+  const isAdmin = currentMember.role === MemberRole.ADMIN;
+  const isModerator = currentMember.role === MemberRole.MODERATOR;
+  const isOwner = currentMember.id === member.id;
+  const canDeleteMessage = !deleted && (isAdmin || isModerator || isOwner);
+  const canEditMessage = !deleted && isOwner && !fileUrl;
+  const isPDF = fileType === "pdf" && fileUrl;
+  const isImage = !isPDF && fileUrl;
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      content,
+    }
+  });
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleKeyDown = (event: any) => {
+      if (event.key === "Escape" || event.code === 27) {
+        setIsEditing(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  },[])
+
+
+  const isLoading = form.formState.isSubmitting;
+
+  // 提交修改消息
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const url = qs.stringifyUrl({
+        url: `${socketUrl}/${id}`,
+        query: socketQuery,
+      })
+
+      await axios.patch(url, values)
+      form.reset();
+      setIsEditing(false);
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
+
+
+  useEffect(() => {
+    form.reset({
+      content,
+    })
+  }, [content])
 
 
   return (
@@ -62,9 +141,109 @@ export const ChatItem = ({
               {timestamp}
             </span>
           </div>
-          {content}
+          {isImage && (
+            <a
+              href={fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative aspect-square 
+              rounded-md mt-2 overflow-hidden border
+               flex items-center bg-secondary h-48 w-48"
+            >
+              <Image
+                src={fileUrl}
+                alt={content}
+                fill
+                className="object-cover"
+              />
+            </a>
+          )}
+
+          {isPDF && (
+            <div className="relative flex items-center p-2 mt-2 rounded-md bg-background/10">
+              <FileIcon className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 text-sm text-indigo-500 dark:text-indigo-400 hover:underline"
+              >
+                PDF File
+              </a>
+            </div>
+          )}
+
+          {!fileUrl && !isEditing && (
+            <p className={cn(
+              "text-sm text-zinc-600 dark:text-zinc-300",
+              deleted && "italic text-zinc-500 dark:text-zinc-400 text-xs mt-1"
+            )}>
+              {content}
+              {isUpdated && !deleted && (
+                <span className="text-[10px] mx-2 text-zinc-500 dark:text-zinc-400">
+                  (edited)
+                </span>
+              )}
+            </p>
+          )}
+
+          {/* 修改消息 */}
+          {!fileUrl && isEditing && (
+            <Form {...form}>
+              <form
+                className="flex items-center w-full gap-x-2 pt-2"
+                onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <div className="relative w-full">
+                          <Input
+                            disabled={isLoading}
+                            className="p-2 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
+                            placeholder="编辑消息"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <Button disabled={isLoading} size="sm" variant="primary">
+                  Save
+                </Button>
+              </form>
+              <span className="text-[10px] mt-1 text-zinc-400">
+                Esc取消编辑，按Enter提交
+              </span>
+            </Form>
+          )}
+
         </div>
       </div>
+      {canDeleteMessage && (
+        <div className="hidden group-hover:flex items-center gap-x-2 absolute p-1 -top-2 right-5 bg-white dark:bg-zinc-800 border rounded-sm">
+          {canEditMessage && (
+            <ActionTooltip label="编辑">
+              <Edit
+                onClick={() => setIsEditing(true)}
+                className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition"
+              />
+            </ActionTooltip>
+          )}
+          <ActionTooltip label="删除">
+            <Trash
+              onClick={() => onOpen("deleteMessage", {
+                apiUrl: `${socketUrl}/${id}`,
+                query: socketQuery,
+              })}
+              className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition"
+            />
+          </ActionTooltip>
+        </div>
+      )}
     </div>
   );
 };

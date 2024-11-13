@@ -20,7 +20,8 @@ export const FileUploader = ({
   endpoint
 }: FileUploaderProps) => {
   console.log(value)
-  const fileType = value?.split('.').pop();
+  // const fileType = value?.split('.').pop();
+  const fileType = value?.includes("PD") ? "pdf" : "";
 
   if (value && fileType !== 'pdf') {
     return (
